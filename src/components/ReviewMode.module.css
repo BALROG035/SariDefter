@@ -1,0 +1,362 @@
+.wrapper {
+  flex: 1;
+  background: var(--bg);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 1.5rem 2rem;
+  gap: 2rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.leftSpacer {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.leftContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 960px;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.rightSidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem;
+  background: var(--card-bg);
+  border: 3px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 4px 6px 0px var(--shadow);
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.verticalProgressBar {
+  width: 12px;
+  flex: 1;
+  background: var(--border);
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.verticalProgressFill {
+  width: 100%;
+  height: var(--p);
+  background: var(--accent-gradient);
+  border-radius: 999px;
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s;
+}
+
+.sidebarLabel {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-primary);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.headerIcon {
+  font-size: 1.2rem;
+  transform: rotate(90deg);
+}
+
+.headerTitle {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.counter {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  background: var(--chip-bg);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: 48px;
+}
+
+@media (max-width: 1024px) {
+  .leftSpacer {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .wrapper {
+    flex-direction: column-reverse;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .rightSidebar {
+    width: 100%;
+    flex-direction: row;
+    height: 60px;
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
+  }
+
+  .sidebarLabel {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .headerIcon {
+    transform: none;
+  }
+
+  .verticalProgressBar {
+    height: 8px;
+    width: 100%;
+    min-height: unset;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .verticalProgressFill {
+    height: 100%;
+    width: var(--p);
+  }
+}
+
+/* Scene / card flip */
+.scene {
+  width: 100%;
+  max-width: 960px;
+  perspective: 1200px;
+  flex: 1;
+  min-height: 480px;
+  display: flex;
+  align-items: stretch;
+}
+
+.card {
+  width: 100%;
+  flex: 1;
+  min-height: 480px;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s;
+  background: var(--card-bg);
+  border: 3px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 6px 8px 0px var(--shadow);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1.2rem;
+}
+
+.exitLeft {
+  opacity: 0;
+  transform: translateX(-80px) scale(0.9);
+}
+
+.exitRight {
+  opacity: 0;
+  transform: translateX(80px) scale(0.9);
+}
+
+.cardTag {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1a1a2e;
+}
+
+.cardTitle {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+  padding-right: 80px;
+  /* prevent overlap with the absolute tag on the right */
+}
+
+
+
+.cardDesc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Code block inside review */
+.codeBlock {
+  width: 100%;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  background: var(--code-header-bg);
+  border-bottom: 2px solid var(--border);
+}
+
+.codeDots {
+  display: flex;
+  gap: 5px;
+}
+
+.codeDots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.codeDots span:nth-child(1) {
+  background: #ffe066;
+}
+
+.codeDots span:nth-child(2) {
+  background: #ffcc00;
+}
+
+.codeDots span:nth-child(3) {
+  background: #cca300;
+}
+
+.code {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--code-text);
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 540px;
+  overflow-y: auto;
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 960px;
+}
+
+.navBtn {
+  flex: 1;
+  background: var(--card-bg);
+  border: 2.5px solid var(--border);
+  border-radius: 14px;
+  padding: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-family: inherit;
+  box-shadow: 3px 4px 0px var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.navBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 0px var(--shadow);
+}
+
+.navBtn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 1px 2px 0px var(--shadow);
+}
+
+.navBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.navBtnPrimary {
+  background: var(--accent-gradient);
+  color: var(--btn-text);
+  border: 2.5px solid var(--border);
+  box-shadow: 3px 4px 0px var(--accent-dark);
+}
+
+.navBtnPrimary:hover:not(:disabled) {
+  box-shadow: 4px 6px 0px var(--accent-dark);
+}
+
+.shuffleNote {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+/* Empty state */
+.emptyWrapper {
+  justify-content: center !important;
+  align-items: center !important;
+  flex-direction: column !important;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3.5rem;
+}
+
+.closeBtn2 {
+  background: var(--accent-gradient);
+  border: 2.5px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--btn-text);
+  cursor: pointer;
+  font-family: inherit;
+}

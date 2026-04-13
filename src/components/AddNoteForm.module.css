@@ -1,0 +1,216 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 30, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.form {
+  background: var(--card-bg);
+  border: 3px solid var(--border);
+  border-radius: 24px;
+  padding: 2rem 2rem 1.5rem;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 8px 12px 0px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px) scale(0.96); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.formIcon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.formTitle {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.closeBtn {
+  background: none;
+  border: 2.5px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg);
+  transform: rotate(90deg);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.required {
+  color: var(--text-primary);
+}
+
+.input,
+.textarea,
+.codeTextarea {
+  background: var(--input-bg);
+  border: 2.5px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus,
+.codeTextarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.inputError {
+  border-color: var(--text-primary) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+.codeTextarea {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.83rem;
+  line-height: 1.65;
+}
+
+.error {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tagSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.tagChip {
+  background: var(--chip-bg);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.tagChip:hover {
+  background: var(--accent);
+  color: var(--btn-text);
+  border-color: var(--accent);
+  transform: scale(1.07);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.2rem;
+}
+
+.cancelBtn {
+  background: none;
+  border: 2.5px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.cancelBtn:hover {
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.submitBtn {
+  background: var(--accent-gradient);
+  border: 2.5px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--btn-text);
+  box-shadow: 3px 4px 0px var(--accent-dark);
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 0px var(--accent-dark);
+}
+
+.submitBtn:active {
+  transform: translateY(1px);
+  box-shadow: 1px 2px 0px var(--accent-dark);
+}
