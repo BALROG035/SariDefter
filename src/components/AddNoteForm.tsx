@@ -87,78 +87,81 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ groups, onAdd, onCancel, init
           </button>
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="note-title">
-            Başlık <span className={styles.required}>*</span>
-          </label>
-          <input
-            id="note-title"
-            name="title"
-            type="text"
-            className={`${styles.input} ${errors.title ? styles.inputError : ''}`}
-            value={form.title}
-            onChange={handleChange}
-            placeholder="örn: LINQ GroupBy Örneği"
-            autoFocus
-          />
-          {errors.title && <span className={styles.error}>{errors.title}</span>}
-        </div>
+        <div className={styles.formBody}>
+          <div className={styles.leftCol}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="note-title">
+                Başlık <span className={styles.required}>*</span>
+              </label>
+              <input
+                id="note-title"
+                name="title"
+                type="text"
+                className={`${styles.input} ${errors.title ? styles.inputError : ''}`}
+                value={form.title}
+                onChange={handleChange}
+                placeholder="örn: LINQ GroupBy Örneği"
+                autoFocus
+              />
+              {errors.title && <span className={styles.error}>{errors.title}</span>}
+            </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="note-tag">
-            Etiket / Kategori <span className={styles.required}>*</span>
-          </label>
-          <input
-            id="note-tag"
-            name="tag"
-            type="text"
-            className={`${styles.input} ${errors.tag ? styles.inputError : ''}`}
-            value={form.tag}
-            onChange={handleChange}
-            placeholder="örn: C#, React, Docker..."
-          />
-          {errors.tag && <span className={styles.error}>{errors.tag}</span>}
-          <div className={styles.tagSuggestions}>
-            {['C#', 'ASP.NET', 'EF Core', 'React', 'TypeScript', 'Docker', 'Python'].map((t) => (
-              <button
-                key={t}
-                type="button"
-                className={`${styles.tagChip} ${form.tag === t ? styles.tagChipActive : ''}`}
-                onClick={() => setForm((p) => ({ ...p, tag: t }))}
-              >
-                {t}
-              </button>
-            ))}
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="note-tag">
+                Etiket / Kategori <span className={styles.required}>*</span>
+              </label>
+              <input
+                id="note-tag"
+                name="tag"
+                type="text"
+                className={`${styles.input} ${errors.tag ? styles.inputError : ''}`}
+                value={form.tag}
+                onChange={handleChange}
+                placeholder="örn: C#, React, Docker..."
+              />
+              {errors.tag && <span className={styles.error}>{errors.tag}</span>}
+              <div className={styles.tagSuggestions}>
+                {['C#', 'ASP.NET', 'EF Core', 'React', 'TypeScript', 'Docker', 'Python'].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`${styles.tagChip} ${form.tag === t ? styles.tagChipActive : ''}`}
+                    onClick={() => setForm((p) => ({ ...p, tag: t }))}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {!initialData && groups.length > 0 && (
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="note-group">
+                  <Folder size={13} style={{ display: 'inline', marginRight: 4 }} />
+                  Gruba Ekle <span className={styles.optional}>(isteğe bağlı)</span>
+                </label>
+                <select
+                  id="note-group"
+                  className={styles.select}
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                >
+                  <option value="">— Grup seçme —</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} ({g.noteIds.length} not)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
-        </div>
 
-        {!initialData && groups.length > 0 && (
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="note-group">
-              <Folder size={13} style={{ display: 'inline', marginRight: 4 }} />
-              Gruba Ekle <span className={styles.optional}>(isteğe bağlı)</span>
-            </label>
-            <select
-              id="note-group"
-              className={styles.select}
-              value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
-            >
-              <option value="">— Grup seçme —</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} ({g.noteIds.length} not)
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="note-code">
-            Kod Parçacığı
-          </label>
+          <div className={styles.rightCol}>
+            <div className={`${styles.field} ${styles.codeField}`}>
+              <label className={styles.label} htmlFor="note-code">
+                Kod Parçacığı
+              </label>
           <textarea
             id="note-code"
             name="codeSnippet"
@@ -169,6 +172,8 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ groups, onAdd, onCancel, init
             rows={6}
             spellCheck={false}
           />
+            </div>
+          </div>
         </div>
 
         <div className={styles.actions}>

@@ -40,6 +40,7 @@ const App: React.FC = () => {
 
   const [groupsExpanded, setGroupsExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_groups') !== 'false');
   const [tagsExpanded, setTagsExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_tags') !== 'false');
+  const [tagsShowAll, setTagsShowAll] = useState(false);
 
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -237,7 +238,8 @@ const App: React.FC = () => {
             <h3>Filtreler</h3>
             <button className="drawer-close" onClick={() => setIsLeftDrawerOpen(false)}><X size={20} /></button>
           </div>
-          <div className="sidebar-stats">
+          <div className="sidebar-scroll-area">
+            <div className="sidebar-stats">
             <div className="sidebar-stat">
               <span className="sidebar-stat-num">{notes.filter(n => !n.deleted).length}</span>
               <span className="sidebar-stat-label">Not</span>
@@ -268,7 +270,7 @@ const App: React.FC = () => {
                   Tümü
                   <span className="sidebar-tag-count">{notes.length}</span>
                 </button>
-                {allTags.map((tag) => (
+                {allTags.slice(0, tagsShowAll ? allTags.length : 5).map((tag) => (
                   <button
                     key={tag}
                     className={`sidebar-tag-item ${filter.type === 'tag' && filter.id === tag ? 'sidebar-tag-item--active' : ''}`}
@@ -281,6 +283,15 @@ const App: React.FC = () => {
                     </span>
                   </button>
                 ))}
+                {allTags.length > 5 && (
+                  <button
+                    className="sidebar-tag-item"
+                    style={{ color: 'var(--text-muted)', fontSize: '0.78rem', justifyContent: 'center' }}
+                    onClick={() => setTagsShowAll(!tagsShowAll)}
+                  >
+                    {tagsShowAll ? 'Daha az gör...' : `${allTags.length - 5} etiket daha gör...`}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -349,8 +360,9 @@ const App: React.FC = () => {
               </div>
             )}
           </div>
+          </div>
 
-          <div className="sidebar-section" style={{ paddingBottom: 0, marginTop: 'auto', marginBottom: '1rem' }}>
+          <div className="sidebar-bottom-fixed">
             <button
               className={`drawer-item ${filter.type === 'trash' ? 'drawer-item--primary' : ''}`}
               style={{ margin: '0 1rem', width: 'calc(100% - 2rem)', border: filter.type === 'trash' ? '' : '2.5px solid transparent', boxShadow: filter.type === 'trash' ? '' : 'none' }}

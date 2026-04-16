@@ -196,16 +196,17 @@
 
 .scene {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px;
   perspective: 1200px;
   display: flex;
   align-items: stretch;
-  min-height: 400px;
+  height: 75vh;
+  min-height: 500px;
 }
 
 .card {
   width: 100%;
-  min-height: 400px;
+  height: 100%;
   position: relative;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.18s;
   background: var(--card-bg);
@@ -267,6 +268,9 @@
   border: 2px solid var(--border);
   overflow: hidden;
   background: var(--code-bg);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .codeHeader {
@@ -302,7 +306,7 @@
   color: var(--code-text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  max-height: 380px;
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -310,7 +314,7 @@
   display: flex;
   gap: 1rem;
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px;
 }
 
 .navBtn {
@@ -423,12 +427,12 @@
   background: var(--chip-bg);
   border: 2px solid var(--border);
   border-radius: 999px;
-  padding: 4px;
+  padding: 4px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  width: 48px;
+  min-width: 48px;
 }
 
 .emptyWrapper {

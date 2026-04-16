@@ -62,7 +62,9 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 .with-icon {
@@ -324,8 +326,20 @@ body {
   border-right: 2.5px solid var(--border);
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-scroll-area {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 1.2rem 0 2rem;
+  padding: 1.2rem 0 0;
+}
+
+.sidebar-bottom-fixed {
+  padding: 1rem 0 1.2rem;
+  background: var(--card-bg);
+  border-top: 2.5px solid var(--border);
+  margin-top: auto;
 }
 
 .sidebar-stats {
@@ -643,12 +657,12 @@ body {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--card-bg);
     width: 300px;
-    padding: 1.5rem 0;
     border-right: 3px solid var(--border);
   }
 
   .feed-sidebar .drawer-header,
   [class*="leftSidebar"] .drawer-header {
+    padding-top: 1.5rem;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
     margin-bottom: 1rem;
