@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
-import { Notebook, Repeat, ArrowLeft, ArrowRight, Tag, List, Folder, ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Notebook, Repeat, ArrowLeft, ArrowRight, Tag, List, Folder, ChevronDown, ChevronRight, X } from 'lucide-react';
 import type { Note, Group } from '../types';
 import styles from './ReviewMode.module.css';
 
 interface ReviewModeProps {
   notes: Note[];
   groups: Group[];
+  isLeftDrawerOpen?: boolean;
+  onCloseDrawer?: () => void;
 }
 
 function seededShuffle<T>(arr: T[], seed: number): T[] {
@@ -26,7 +28,7 @@ function getDaySeed(): number {
 
 const ALL_GROUP = '__all__';
 
-const ReviewMode: React.FC<ReviewModeProps> = ({ notes, groups }) => {
+const ReviewMode: React.FC<ReviewModeProps> = ({ notes, groups, isLeftDrawerOpen, onCloseDrawer }) => {
   const visibleNotes = useMemo(() => notes.filter((n) => !n.hidden), [notes]);
 
   const tagGroups = useMemo(
@@ -42,8 +44,16 @@ const ReviewMode: React.FC<ReviewModeProps> = ({ notes, groups }) => {
   const [selectedGroup, setSelectedGroup] = useState<string>(ALL_GROUP);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
-  const [tagsExpanded, setTagsExpanded] = useState(true);
-  const [customExpanded, setCustomExpanded] = useState(true);
+  const [tagsExpanded, setTagsExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_tags') !== 'false');
+  const [customExpanded, setCustomExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_groups') !== 'false');
+
+  useEffect(() => {
+    localStorage.setItem('devnotes_sidebar_tags', String(tagsExpanded));
+  }, [tagsExpanded]);
+
+  useEffect(() => {
+    localStorage.setItem('devnotes_sidebar_groups', String(customExpanded));
+  }, [customExpanded]);
 
   const shuffled = useMemo(() => {
     let pool: Note[];
@@ -95,9 +105,12 @@ const ReviewMode: React.FC<ReviewModeProps> = ({ notes, groups }) => {
   const current = shuffled[index];
 
   return (
-    <div className={styles.wrapper}>
-
-      <aside className={styles.leftSidebar}>
+    <div className={`${styles.wrapper} ${isLeftDrawerOpen ? styles.drawerOpen : ''}`}>
+      <aside className={`${styles.leftSidebar} ${isLeftDrawerOpen ? styles.sidebarOpen : ''}`}>
+        <div className="drawer-header mobile-only">
+          <h3>Tekrar Filtreleri</h3>
+          <button className="drawer-close" onClick={onCloseDrawer}><X size={20} /></button>
+        </div>
         <div className={styles.sidebarStats}>
           <div className={styles.sidebarStat}>
             <span className={styles.sidebarStatNum}>{visibleNotes.length}</span>
@@ -179,6 +192,8 @@ const ReviewMode: React.FC<ReviewModeProps> = ({ notes, groups }) => {
           </div>
         )}
       </aside>
+
+      {isLeftDrawerOpen && <div className="drawer-overlay" onClick={onCloseDrawer} />}
 
       <div className={styles.centerContent}>
         {shuffled.length === 0 ? (

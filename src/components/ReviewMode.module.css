@@ -461,11 +461,23 @@
   }
 
   .leftSidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 2.5px solid var(--border);
-    padding: 1rem 0;
-    max-height: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1001;
+    background: var(--card-bg);
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 5px 0 25px rgba(0,0,0,0.2);
+    border-right: 3px solid var(--border);
+    max-height: none;
+    padding: 1.5rem 0;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
   }
 
   .centerContent {
@@ -473,20 +485,41 @@
   }
 
   .rightSidebar {
+    order: -1;
     width: 100%;
-    flex-direction: row;
+    flex-direction: row-reverse;
+    justify-content: space-between;
     height: auto;
-    padding: 0.8rem 1rem;
+    padding: 0.6rem 1rem;
     border-left: none;
-    border-top: 2.5px solid var(--border);
+    border-bottom: 2.5px solid var(--border);
+    background: var(--navbar-bg);
+  }
+
+  .sidebarLabel {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .headerTitle {
+    font-size: 0.85rem;
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .headerIcon {
+    width: 16px;
+    height: 16px;
   }
 
   .verticalProgressBar {
-    height: 12px;
-    width: 100%;
+    height: 8px;
+    width: 35%;
     max-height: none;
     flex-direction: row;
-    justify-content: flex-start;
+    margin: 0;
   }
 
   .verticalProgressFill {

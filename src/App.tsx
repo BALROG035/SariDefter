@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   BookMarked, List, RefreshCw, Sun, Moon, Search, Plus, NotebookPen,
   X, Pencil, Download, Upload, CheckCircle, AlertTriangle,
-  Trash2, Check, Tag, Folder, ChevronDown, ChevronRight,
+  Trash2, Check, Tag, Folder, ChevronDown, ChevronRight, Menu, MoreVertical
 } from 'lucide-react';
 import type { View, Note } from './types';
 import { useNotes } from './hooks/useNotes';
@@ -38,15 +38,25 @@ const App: React.FC = () => {
   const [groupModalNoteId, setGroupModalNoteId] = useState<string | null>(null);
   const [inlineGroupName, setInlineGroupName] = useState('');
 
-  const [groupsExpanded, setGroupsExpanded] = useState(true);
-  const [tagsExpanded, setTagsExpanded] = useState(true);
+  const [groupsExpanded, setGroupsExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_groups') !== 'false');
+  const [tagsExpanded, setTagsExpanded] = useState(() => localStorage.getItem('devnotes_sidebar_tags') !== 'false');
 
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [isLeftDrawerOpen, setIsLeftDrawerOpen] = useState(false);
+  const [isRightDrawerOpen, setIsRightDrawerOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('devnotes_sidebar_groups', String(groupsExpanded));
+  }, [groupsExpanded]);
+
+  useEffect(() => {
+    localStorage.setItem('devnotes_sidebar_tags', String(tagsExpanded));
+  }, [tagsExpanded]);
 
   const handleDeleteNote = (id: string) => {
     deleteNote(id);
@@ -130,12 +140,20 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${isLeftDrawerOpen || isRightDrawerOpen ? 'drawer-open' : ''}`}>
       <header className="navbar">
+        <button className="mobile-toggle left-toggle" onClick={() => setIsLeftDrawerOpen(true)}>
+          <Menu size={24} />
+        </button>
+
         <div className="navbar-brand">
           <span className="navbar-logo"><BookMarked size={28} /></span>
           <span className="navbar-title">Sarı<span className="accent-text">Defter</span></span>
         </div>
+
+        <button className="mobile-toggle right-toggle" onClick={() => setIsRightDrawerOpen(true)}>
+          <MoreVertical size={24} />
+        </button>
 
         <nav className="navbar-nav">
           <button
@@ -152,7 +170,7 @@ const App: React.FC = () => {
           </button>
         </nav>
 
-        <div className="navbar-actions">
+        <div className="navbar-actions desktop-only">
           <input
             ref={fileInputRef}
             type="file"
@@ -176,9 +194,45 @@ const App: React.FC = () => {
         </div>
       </header>
 
+      {/* ── Mobil Sağ Drawer (Actions) ── */}
+      <div className={`drawer right-drawer ${isRightDrawerOpen ? 'drawer--open' : ''}`}>
+        <div className="drawer-header mobile-only">
+          <h3>Araçlar</h3>
+          <button className="drawer-close" onClick={() => setIsRightDrawerOpen(false)}><X size={20} /></button>
+        </div>
+        <div className="drawer-content">
+          <div className="sidebar-section-title mobile-only" style={{ padding: '0.5rem', opacity: 0.6 }}>Görünüm</div>
+          <button className={`drawer-item ${view === 'feed' ? 'drawer-item--primary' : ''}`} onClick={() => { setView('feed'); setIsRightDrawerOpen(false); }}>
+            <List size={18} /> Akış
+          </button>
+          <button className={`drawer-item ${view === 'review' ? 'drawer-item--primary' : ''}`} onClick={() => { setView('review'); setIsRightDrawerOpen(false); }}>
+            <RefreshCw size={18} /> Tekrar
+          </button>
+
+          <div className="sidebar-section-title mobile-only" style={{ padding: '0.5rem', marginTop: '1rem', opacity: 0.6 }}>Araçlar</div>
+          <button className="drawer-item" onClick={() => { fileInputRef.current?.click(); setIsRightDrawerOpen(false); }}>
+            <Upload size={18} /> Notları İçe Aktar
+          </button>
+          <button className="drawer-item" onClick={() => { exportNotes(); setIsRightDrawerOpen(false); }} disabled={notes.length === 0}>
+            <Download size={18} /> Notları Dışa Aktar
+          </button>
+          <button className="drawer-item" onClick={() => { setDarkMode(!darkMode); setIsRightDrawerOpen(false); }}>
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />} {darkMode ? 'Açık Tema' : 'Koyu Tema'}
+          </button>
+          <button className="drawer-item drawer-item--primary" onClick={() => { setShowForm(true); setIsRightDrawerOpen(false); }}>
+            <Plus size={18} /> Yeni Not Ekle
+          </button>
+        </div>
+      </div>
+
       {view === 'feed' ? (
         <div className="feed-layout">
-          <aside className="feed-sidebar">
+          {/* ── Sol Drawer / Sidebar ── */}
+          <aside className={`feed-sidebar ${isLeftDrawerOpen ? 'sidebar--open' : ''}`}>
+            <div className="drawer-header mobile-only">
+              <h3>Filtreler</h3>
+              <button className="drawer-close" onClick={() => setIsLeftDrawerOpen(false)}><X size={20} /></button>
+            </div>
             <div className="sidebar-stats">
               <div className="sidebar-stat">
                 <span className="sidebar-stat-num">{notes.length}</span>
@@ -288,6 +342,11 @@ const App: React.FC = () => {
             </div>
           </aside>
 
+          {/* Overlay for drawers */}
+          {(isLeftDrawerOpen || isRightDrawerOpen) && (
+            <div className="drawer-overlay" onClick={() => { setIsLeftDrawerOpen(false); setIsRightDrawerOpen(false); }} />
+          )}
+
           <main className="feed-main">
             <div className="search-row">
               <div className="search-wrap">
@@ -354,7 +413,12 @@ const App: React.FC = () => {
           </main>
         </div>
       ) : (
-        <ReviewMode notes={notes} groups={groups} />
+        <ReviewMode
+          notes={notes}
+          groups={groups}
+          isLeftDrawerOpen={isLeftDrawerOpen}
+          onCloseDrawer={() => setIsLeftDrawerOpen(false)}
+        />
       )}
 
       {(showForm || editingNote) && (
