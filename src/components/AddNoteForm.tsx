@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Pencil, X, Plus } from 'lucide-react';
-import type { Note } from '../types';
+import { Pencil, X, Plus, Folder } from 'lucide-react';
+import type { Note, Group } from '../types';
 import styles from './AddNoteForm.module.css';
 
 interface AddNoteFormProps {
-  onAdd: (data: Omit<Note, 'id' | 'createdAt'>) => void;
+  groups: Group[];
+  onAdd: (data: Omit<Note, 'id' | 'createdAt'>, groupId?: string) => void;
   onCancel: () => void;
   initialData?: Note;
 }
@@ -23,14 +24,19 @@ const INITIAL_STATE: FormState = {
   tag: '',
 };
 
-const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData }) => {
-  const [form, setForm] = useState<FormState>(initialData ? {
-    title: initialData.title,
-    description: initialData.description || '',
-    codeSnippet: initialData.codeSnippet || '',
-    tag: initialData.tag || '',
-  } : INITIAL_STATE);
+const AddNoteForm: React.FC<AddNoteFormProps> = ({ groups, onAdd, onCancel, initialData }) => {
+  const [form, setForm] = useState<FormState>(
+    initialData
+      ? {
+        title: initialData.title,
+        description: initialData.description || '',
+        codeSnippet: initialData.codeSnippet || '',
+        tag: initialData.tag || '',
+      }
+      : INITIAL_STATE
+  );
   const [errors, setErrors] = useState<Partial<FormState>>({});
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('');
 
   const validate = (): boolean => {
     const newErrors: Partial<FormState> = {};
@@ -40,9 +46,7 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof FormState]) {
@@ -53,14 +57,18 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    onAdd({
-      title: form.title.trim(),
-      description: form.description.trim(),
-      codeSnippet: form.codeSnippet,
-      tag: form.tag.trim(),
-    });
+    onAdd(
+      {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        codeSnippet: form.codeSnippet,
+        tag: form.tag.trim(),
+      },
+      selectedGroupId || undefined
+    );
     setForm(INITIAL_STATE);
     setErrors({});
+    setSelectedGroupId('');
   };
 
   return (
@@ -74,17 +82,11 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
         <div className={styles.formHeader}>
           <Pencil size={24} className={styles.formIcon} />
           <h2 className={styles.formTitle}>{initialData ? 'Notu Düzenle' : 'Yeni Not'}</h2>
-          <button
-            type="button"
-            className={styles.closeBtn}
-            onClick={onCancel}
-            aria-label="Close form"
-          >
+          <button type="button" className={styles.closeBtn} onClick={onCancel} aria-label="Formu kapat">
             <X size={20} />
           </button>
         </div>
 
-        {/* Title */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note-title">
             Başlık <span className={styles.required}>*</span>
@@ -102,7 +104,6 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
           {errors.title && <span className={styles.error}>{errors.title}</span>}
         </div>
 
-        {/* Tag */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note-tag">
             Etiket / Kategori <span className={styles.required}>*</span>
@@ -122,7 +123,7 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
               <button
                 key={t}
                 type="button"
-                className={styles.tagChip}
+                className={`${styles.tagChip} ${form.tag === t ? styles.tagChipActive : ''}`}
                 onClick={() => setForm((p) => ({ ...p, tag: t }))}
               >
                 {t}
@@ -131,7 +132,28 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
           </div>
         </div>
 
-        {/* Description */}
+        {!initialData && groups.length > 0 && (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="note-group">
+              <Folder size={13} style={{ display: 'inline', marginRight: 4 }} />
+              Gruba Ekle <span className={styles.optional}>(isteğe bağlı)</span>
+            </label>
+            <select
+              id="note-group"
+              className={styles.select}
+              value={selectedGroupId}
+              onChange={(e) => setSelectedGroupId(e.target.value)}
+            >
+              <option value="">— Grup seçme —</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name} ({g.noteIds.length} not)
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note-description">
             Açıklama
@@ -147,7 +169,6 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
           />
         </div>
 
-        {/* Code Snippet */}
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note-code">
             Kod Parçacığı
@@ -169,7 +190,7 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ onAdd, onCancel, initialData 
             İptal
           </button>
           <button type="submit" className={`${styles.submitBtn} with-icon`}>
-            {initialData ? <Pencil size={18} /> : <Plus size={18} />} 
+            {initialData ? <Pencil size={18} /> : <Plus size={18} />}
             {initialData ? 'Güncelle' : 'Notu Kaydet'}
           </button>
         </div>

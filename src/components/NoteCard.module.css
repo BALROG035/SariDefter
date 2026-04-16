@@ -171,3 +171,59 @@
   background: var(--accent);
   color: var(--btn-text);
 }
+
+.cardHidden {
+  opacity: 0.55;
+  border-style: dashed;
+  box-shadow: 3px 4px 0px var(--border);
+}
+
+.cardHidden .title,
+.cardHidden .description {
+  color: var(--text-muted);
+}
+
+.hiddenBadge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--text-muted);
+  color: var(--bg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hiddenToggleActive {
+  background: var(--text-muted) !important;
+  border-color: var(--text-muted) !important;
+  color: var(--bg) !important;
+}
+
+.groupBtn {
+  position: relative;
+}
+
+.groupBtnActive {
+  background: var(--chip-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--accent) !important;
+}
+
+.groupBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--accent);
+  color: var(--btn-text);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
