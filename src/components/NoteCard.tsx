@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, ChevronDown, Pencil, Eye, EyeOff, FolderPlus, RefreshCcw } from 'lucide-react';
+import { Trash2, Pencil, Eye, EyeOff, FolderPlus, RefreshCcw } from 'lucide-react';
 import type { Note, Group } from '../types';
 import styles from './NoteCard.module.css';
 
