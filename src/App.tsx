@@ -15,7 +15,7 @@ import './App.css';
 type ImportStage = 'idle' | 'confirm' | 'success' | 'error';
 
 const App: React.FC = () => {
-  const { notes, addNote, deleteNote, updateNote, exportNotes, importNotes, toggleHidden } = useNotes();
+  const { notes, addNote, deleteNote, updateNote, exportNotes, importNotes, toggleHidden, hardDeleteNote, restoreNote } = useNotes();
   const { groups, addGroup, deleteGroup, renameGroup, toggleNoteInGroup, removeNoteFromAllGroups } = useGroups();
 
   const [view, setView] = useState<View>('feed');
@@ -24,8 +24,8 @@ const App: React.FC = () => {
   const [viewingNote, setViewingNote] = useState<Note | null>(null);
   const [search, setSearch] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [sidebarTagFilter, setSidebarTagFilter] = useState<string | null>(null);
-
+  const [filter, setFilter] = useState<{ type: 'all' | 'tag' | 'group' | 'trash', id: string | null }>({ type: 'all', id: null });
+  
   const [importStage, setImportStage] = useState<ImportStage>('idle');
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importMessage, setImportMessage] = useState('');
@@ -127,10 +127,22 @@ const App: React.FC = () => {
     const q = search.toLowerCase();
     const matchesSearch =
       n.title.toLowerCase().includes(q) ||
-      n.tag.toLowerCase().includes(q) ||
-      n.description.toLowerCase().includes(q);
-    const matchesTag = sidebarTagFilter ? (n.tag || 'Genel') === sidebarTagFilter : true;
-    return matchesSearch && matchesTag;
+      (n.tag || '').toLowerCase().includes(q) ||
+      (n.description || '').toLowerCase().includes(q);
+    
+    let matchesFilter = true;
+    if (filter.type === 'tag') {
+      matchesFilter = (n.tag || 'Genel') === filter.id && !n.deleted;
+    } else if (filter.type === 'group') {
+      const g = groups.find(x => x.id === filter.id);
+      matchesFilter = g ? g.noteIds.includes(n.id) && !n.deleted : false;
+    } else if (filter.type === 'trash') {
+      matchesFilter = !!n.deleted;
+    } else {
+      matchesFilter = !n.deleted;
+    }
+
+    return matchesSearch && matchesFilter;
   });
 
   const handleRenameConfirm = () => {
@@ -188,9 +200,6 @@ const App: React.FC = () => {
           <button className="icon-btn" onClick={() => setDarkMode((d) => !d)} title={darkMode ? 'Açık tema' : 'Koyu tema'}>
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <button className="add-btn with-icon" onClick={() => setShowForm(true)}>
-            <Plus size={18} /> Yeni Not
-          </button>
         </div>
       </header>
 
@@ -219,134 +228,144 @@ const App: React.FC = () => {
           <button className="drawer-item" onClick={() => { setDarkMode(!darkMode); setIsRightDrawerOpen(false); }}>
             {darkMode ? <Sun size={18} /> : <Moon size={18} />} {darkMode ? 'Açık Tema' : 'Koyu Tema'}
           </button>
-          <button className="drawer-item drawer-item--primary" onClick={() => { setShowForm(true); setIsRightDrawerOpen(false); }}>
-            <Plus size={18} /> Yeni Not Ekle
-          </button>
         </div>
       </div>
 
-      {view === 'feed' ? (
-        <div className="feed-layout">
-          {/* ── Sol Drawer / Sidebar ── */}
-          <aside className={`feed-sidebar ${isLeftDrawerOpen ? 'sidebar--open' : ''}`}>
-            <div className="drawer-header mobile-only">
-              <h3>Filtreler</h3>
-              <button className="drawer-close" onClick={() => setIsLeftDrawerOpen(false)}><X size={20} /></button>
+      <div className="feed-layout">
+        <aside className={`feed-sidebar ${isLeftDrawerOpen ? 'sidebar--open' : ''}`}>
+          <div className="drawer-header mobile-only">
+            <h3>Filtreler</h3>
+            <button className="drawer-close" onClick={() => setIsLeftDrawerOpen(false)}><X size={20} /></button>
+          </div>
+          <div className="sidebar-stats">
+            <div className="sidebar-stat">
+              <span className="sidebar-stat-num">{notes.filter(n => !n.deleted).length}</span>
+              <span className="sidebar-stat-label">Not</span>
             </div>
-            <div className="sidebar-stats">
-              <div className="sidebar-stat">
-                <span className="sidebar-stat-num">{notes.length}</span>
-                <span className="sidebar-stat-label">Not</span>
-              </div>
-              <div className="sidebar-stat">
-                <span className="sidebar-stat-num">{allTags.length}</span>
-                <span className="sidebar-stat-label">Etiket</span>
-              </div>
-              <div className="sidebar-stat">
-                <span className="sidebar-stat-num">{groups.length}</span>
-                <span className="sidebar-stat-label">Grup</span>
-              </div>
+            <div className="sidebar-stat">
+              <span className="sidebar-stat-num">{allTags.length}</span>
+              <span className="sidebar-stat-label">Etiket</span>
             </div>
-
-            <div className="sidebar-section">
-              <button className="sidebar-section-header" onClick={() => setTagsExpanded((v) => !v)}>
-                <span className="sidebar-section-title with-icon">
-                  <Tag size={14} /> Etiketler
-                </span>
-                {tagsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              </button>
-              {tagsExpanded && (
-                <div className="sidebar-items">
-                  <button
-                    className={`sidebar-tag-item ${sidebarTagFilter === null ? 'sidebar-tag-item--active' : ''}`}
-                    onClick={() => setSidebarTagFilter(null)}
-                  >
-                    <span className="sidebar-tag-dot" style={{ background: 'var(--accent)' }} />
-                    Tümü
-                    <span className="sidebar-tag-count">{notes.length}</span>
-                  </button>
-                  {allTags.map((tag) => (
-                    <button
-                      key={tag}
-                      className={`sidebar-tag-item ${sidebarTagFilter === tag ? 'sidebar-tag-item--active' : ''}`}
-                      onClick={() => setSidebarTagFilter(sidebarTagFilter === tag ? null : tag)}
-                    >
-                      <span className="sidebar-tag-dot" />
-                      {tag}
-                      <span className="sidebar-tag-count">
-                        {notes.filter((n) => (n.tag || 'Genel') === tag).length}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
+            <div className="sidebar-stat">
+              <span className="sidebar-stat-num">{groups.length}</span>
+              <span className="sidebar-stat-label">Grup</span>
             </div>
-
-            <div className="sidebar-section">
-              <div className="sidebar-section-header-row">
-                <button className="sidebar-section-header" onClick={() => setGroupsExpanded((v) => !v)}>
-                  <span className="sidebar-section-title with-icon">
-                    <Folder size={14} /> Gruplar
-                  </span>
-                  {groupsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                </button>
+          </div>
+          <div className="sidebar-section">
+            <button className="sidebar-section-header" onClick={() => setTagsExpanded((v) => !v)}>
+              <span className="sidebar-section-title with-icon">
+                <Tag size={14} /> Etiketler
+              </span>
+              {tagsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+            {tagsExpanded && (
+              <div className="sidebar-items">
                 <button
-                  className="sidebar-create-group-btn with-icon"
-                  onClick={openCreateGroup}
-                  title="Yeni Grup Oluştur"
+                  className={`sidebar-tag-item ${filter.type === 'all' ? 'sidebar-tag-item--active' : ''}`}
+                  onClick={() => setFilter({ type: 'all', id: null })}
                 >
-                  <Plus size={13} /> Yeni
+                  <span className="sidebar-tag-dot" style={{ background: 'var(--accent)' }} />
+                  Tümü
+                  <span className="sidebar-tag-count">{notes.length}</span>
                 </button>
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`sidebar-tag-item ${filter.type === 'tag' && filter.id === tag ? 'sidebar-tag-item--active' : ''}`}
+                    onClick={() => setFilter({ type: 'tag', id: tag })}
+                  >
+                    <span className="sidebar-tag-dot" />
+                    {tag}
+                    <span className="sidebar-tag-count">
+                      {notes.filter((n) => (n.tag || 'Genel') === tag).length}
+                    </span>
+                  </button>
+                ))}
               </div>
-              {groupsExpanded && (
-                <div className="sidebar-items">
-                  {groups.length === 0 && (
-                    <p className="sidebar-empty">Henüz grup yok.</p>
-                  )}
-                  {groups.map((g) => (
-                    <div key={g.id} className="sidebar-group-item">
-                      {renamingGroupId === g.id ? (
-                        <input
-                          className="sidebar-rename-input"
-                          value={renameValue}
-                          autoFocus
-                          onChange={(e) => setRenameValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleRenameConfirm();
-                            if (e.key === 'Escape') setRenamingGroupId(null);
-                          }}
-                          onBlur={handleRenameConfirm}
-                          maxLength={40}
-                        />
-                      ) : (
-                        <button
-                          className="sidebar-group-name"
-                          onClick={() => { setRenamingGroupId(g.id); setRenameValue(g.name); }}
-                          title="Yeniden adlandır"
-                        >
-                          {g.name}
-                        </button>
-                      )}
-                      <span className="sidebar-tag-count">{g.noteIds.length}</span>
-                      <button
-                        className="sidebar-group-delete"
-                        onClick={() => deleteGroup(g.id)}
-                        title="Grubu sil"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            )}
+          </div>
+
+          <div className="sidebar-section">
+            <div className="sidebar-section-header-row">
+              <button className="sidebar-section-header" onClick={() => setGroupsExpanded((v) => !v)}>
+                <span className="sidebar-section-title with-icon">
+                  <Folder size={14} /> Gruplar
+                </span>
+                {groupsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </button>
+              <button
+                className="sidebar-create-group-btn with-icon"
+                onClick={openCreateGroup}
+                title="Yeni Grup Oluştur"
+              >
+                <Plus size={13} /> Yeni
+              </button>
             </div>
-          </aside>
+            {groupsExpanded && (
+              <div className="sidebar-items">
+                {groups.length === 0 && (
+                  <p className="sidebar-empty">Henüz grup yok.</p>
+                )}
+                {groups.map((g) => (
+                  <div key={g.id} className={`sidebar-group-item ${filter.type === 'group' && filter.id === g.id ? 'sidebar-tag-item--active' : ''}`}>
+                    {renamingGroupId === g.id ? (
+                      <input
+                        className="sidebar-rename-input"
+                        value={renameValue}
+                        autoFocus
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameConfirm();
+                          if (e.key === 'Escape') setRenamingGroupId(null);
+                        }}
+                        onBlur={handleRenameConfirm}
+                        maxLength={40}
+                      />
+                    ) : (
+                      <button
+                        className="sidebar-group-name"
+                        onClick={() => setFilter({ type: 'group', id: g.id })}
+                      >
+                        {g.name}
+                      </button>
+                    )}
+                    <button
+                      className="sidebar-group-edit-btn"
+                      onClick={(e) => { e.stopPropagation(); setRenamingGroupId(g.id); setRenameValue(g.name); }}
+                      title="Grubu düzenle"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      className="sidebar-group-delete"
+                      onClick={(e) => { e.stopPropagation(); deleteGroup(g.id); if (filter.id === g.id) setFilter({ type: 'all', id: null }); }}
+                      title="Grubu sil"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                    <span className="sidebar-tag-count">{g.noteIds.length}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-          {/* Overlay for drawers */}
-          {(isLeftDrawerOpen || isRightDrawerOpen) && (
-            <div className="drawer-overlay" onClick={() => { setIsLeftDrawerOpen(false); setIsRightDrawerOpen(false); }} />
-          )}
+          <div className="sidebar-section" style={{ paddingBottom: 0, marginTop: 'auto', marginBottom: '1rem' }}>
+            <button
+              className={`drawer-item ${filter.type === 'trash' ? 'drawer-item--primary' : ''}`}
+              style={{ margin: '0 1rem', width: 'calc(100% - 2rem)', border: filter.type === 'trash' ? '' : '2.5px solid transparent', boxShadow: filter.type === 'trash' ? '' : 'none' }}
+              onClick={() => setFilter({ type: 'trash', id: null })}
+            >
+              <Trash2 size={16} /> Silinenler ({notes.filter(n => n.deleted).length})
+            </button>
+          </div>
+        </aside>
 
+        {(isLeftDrawerOpen || isRightDrawerOpen) && (
+          <div className="drawer-overlay" onClick={() => { setIsLeftDrawerOpen(false); setIsRightDrawerOpen(false); }} />
+        )}
+
+        {view === 'feed' ? (
           <main className="feed-main">
             <div className="search-row">
               <div className="search-wrap">
@@ -365,11 +384,21 @@ const App: React.FC = () => {
               </button>
             </div>
 
-            {sidebarTagFilter && (
+            {filter.type !== 'all' && filter.type !== 'trash' && (
               <div className="active-filter-bar">
-                <Tag size={14} />
-                <span><strong>{sidebarTagFilter}</strong> etiketi filtreleniyor</span>
-                <button className="filter-clear-btn" onClick={() => setSidebarTagFilter(null)}>
+                {filter.type === 'tag' ? <Tag size={14} /> : <Folder size={14} />}
+                <span><strong>{filter.type === 'tag' ? filter.id : groups.find(g => g.id === filter.id)?.name}</strong> filtreleniyor</span>
+                <button className="filter-clear-btn" onClick={() => setFilter({ type: 'all', id: null })}>
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+            
+            {filter.type === 'trash' && (
+              <div className="active-filter-bar" style={{ background: '#ffeded', borderColor: '#ff4444', color: '#ff4444' }}>
+                <Trash2 size={14} />
+                <span>Çöp kutusu görüntüleniyor. Buradaki notlar kalıcı olarak silinebilir.</span>
+                <button className="filter-clear-btn" style={{ background: '#fff', borderColor: '#ff4444', color: '#ff4444' }} onClick={() => setFilter({ type: 'all', id: null })}>
                   <X size={14} />
                 </button>
               </div>
@@ -402,6 +431,8 @@ const App: React.FC = () => {
                     note={note}
                     groups={groups}
                     onDelete={handleDeleteNote}
+                    onHardDelete={hardDeleteNote}
+                    onRestore={restoreNote}
                     onEdit={(n) => setEditingNote(n)}
                     onView={(n) => setViewingNote(n)}
                     onToggleHidden={toggleHidden}
@@ -411,15 +442,15 @@ const App: React.FC = () => {
               </div>
             )}
           </main>
-        </div>
-      ) : (
-        <ReviewMode
-          notes={notes}
-          groups={groups}
-          isLeftDrawerOpen={isLeftDrawerOpen}
-          onCloseDrawer={() => setIsLeftDrawerOpen(false)}
-        />
-      )}
+        ) : (
+          <div className="review-main-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <ReviewMode
+              notes={filtered}
+              groups={groups}
+            />
+          </div>
+        )}
+      </div>
 
       {(showForm || editingNote) && (
         <AddNoteForm

@@ -154,20 +154,6 @@ const AddNoteForm: React.FC<AddNoteFormProps> = ({ groups, onAdd, onCancel, init
           </div>
         )}
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="note-description">
-            Açıklama
-          </label>
-          <textarea
-            id="note-description"
-            name="description"
-            className={styles.textarea}
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Bu kavramın kısa bir açıklaması..."
-            rows={3}
-          />
-        </div>
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="note-code">

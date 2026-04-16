@@ -38,7 +38,15 @@ export function useNotes() {
   );
 
   const deleteNote = useCallback((id: string) => {
+    setNotes((prev) => prev.map((n) => n.id === id ? { ...n, deleted: true } : n));
+  }, []);
+
+  const hardDeleteNote = useCallback((id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
+  }, []);
+
+  const restoreNote = useCallback((id: string) => {
+    setNotes((prev) => prev.map((n) => n.id === id ? { ...n, deleted: false } : n));
   }, []);
 
   const updateNote = useCallback((id: string, data: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
@@ -102,5 +110,5 @@ export function useNotes() {
     );
   }, []);
 
-  return { notes, addNote, deleteNote, updateNote, exportNotes, importNotes, toggleHidden };
+  return { notes, addNote, deleteNote, updateNote, exportNotes, importNotes, toggleHidden, hardDeleteNote, restoreNote };
 }

@@ -6,6 +6,7 @@ export interface Note {
   tag: string;
   createdAt: string;
   hidden?: boolean;
+  deleted?: boolean;
 }
 
 export interface Group {

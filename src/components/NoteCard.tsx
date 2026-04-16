@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, ChevronDown, Pencil, Eye, EyeOff, FolderPlus } from 'lucide-react';
+import { Trash2, ChevronDown, Pencil, Eye, EyeOff, FolderPlus, RefreshCcw } from 'lucide-react';
 import type { Note, Group } from '../types';
 import styles from './NoteCard.module.css';
 
@@ -7,6 +7,8 @@ interface NoteCardProps {
   note: Note;
   groups: Group[];
   onDelete: (id: string) => void;
+  onHardDelete: (id: string) => void;
+  onRestore: (id: string) => void;
   onEdit: (note: Note) => void;
   onView: (note: Note) => void;
   onToggleHidden: (id: string) => void;
@@ -21,6 +23,8 @@ const NoteCard: React.FC<NoteCardProps> = ({
   note,
   groups,
   onDelete,
+  onHardDelete,
+  onRestore,
   onEdit,
   onView,
   onToggleHidden,
@@ -36,7 +40,10 @@ const NoteCard: React.FC<NoteCardProps> = ({
   const groupCount = groups.filter((g) => g.noteIds.includes(note.id)).length;
 
   return (
-    <article className={`${styles.card} ${note.hidden ? styles.cardHidden : ''}`}>
+    <article
+      className={`${styles.card} ${note.hidden ? styles.cardHidden : ''}`}
+      onClick={() => onView(note)}
+    >
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <span
@@ -46,12 +53,36 @@ const NoteCard: React.FC<NoteCardProps> = ({
             {note.tag || 'Genel'}
           </span>
           <span className={styles.date}>{dateStr}</span>
-          {note.hidden && <span className={styles.hiddenBadge}>Gizli</span>}
+          {note.hidden && !note.deleted && <span className={styles.hiddenBadge}>Gizli</span>}
+          {note.deleted && <span className={styles.hiddenBadge} style={{ background: '#ff4444' }}>Silindi</span>}
         </div>
         <div className={styles.headerActions}>
+          {note.deleted ? (
+            <>
+              <button
+                className={styles.actionBtn}
+                onClick={(e) => { e.stopPropagation(); onRestore(note.id); }}
+                aria-label="Notu kurtar"
+                title="Notu kurtar"
+                style={{ color: '#27c93f' }}
+              >
+                <RefreshCcw size={16} /> Kurtar
+              </button>
+              <button
+                className={styles.deleteBtn}
+                onClick={(e) => { e.stopPropagation(); onHardDelete(note.id); }}
+                aria-label="Kalıcı olarak sil"
+                title="Kalıcı olarak sil"
+              >
+                <Trash2 size={16} />
+              </button>
+            </>
+          ) : (
+            <>
+
           <button
             className={`${styles.actionBtn} ${styles.groupBtn} ${groupCount > 0 ? styles.groupBtnActive : ''}`}
-            onClick={() => onManageGroups(note.id)}
+            onClick={(e) => { e.stopPropagation(); onManageGroups(note.id); }}
             aria-label="Grupları yönet"
             title="Gruba ekle / kaldır"
           >
@@ -62,7 +93,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
           </button>
           <button
             className={`${styles.actionBtn} ${note.hidden ? styles.hiddenToggleActive : ''}`}
-            onClick={() => onToggleHidden(note.id)}
+            onClick={(e) => { e.stopPropagation(); onToggleHidden(note.id); }}
             aria-label={note.hidden ? 'Notu tekrarda göster' : 'Notu tekrarda gizle'}
             title={note.hidden ? 'Tekrarda göster' : 'Tekrarda gizle'}
           >
@@ -70,20 +101,22 @@ const NoteCard: React.FC<NoteCardProps> = ({
           </button>
           <button
             className={styles.actionBtn}
-            onClick={() => onEdit(note)}
+            onClick={(e) => { e.stopPropagation(); onEdit(note); }}
             aria-label="Notu düzenle"
             title="Notu düzenle"
           >
             <Pencil size={15} />
           </button>
-          <button
-            className={styles.deleteBtn}
-            onClick={() => onDelete(note.id)}
-            aria-label="Notu sil"
-            title="Notu sil"
-          >
-            <Trash2 size={16} />
-          </button>
+              <button
+                className={styles.deleteBtn}
+                onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+                aria-label="Notu sil"
+                title="Notu çöp kutusuna taşı"
+              >
+                <Trash2 size={16} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -106,14 +139,6 @@ const NoteCard: React.FC<NoteCardProps> = ({
           <pre className={styles.code}>
             <code>{note.codeSnippet}</code>
           </pre>
-          {note.codeSnippet.split('\n').length > 8 && (
-            <button
-              className={`${styles.expandBtn} with-icon`}
-              onClick={() => onView(note)}
-            >
-              <ChevronDown size={16} /> Tamamını Gör
-            </button>
-          )}
         </div>
       )}
     </article>

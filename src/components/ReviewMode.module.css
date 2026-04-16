@@ -289,9 +289,9 @@
   display: inline-block;
 }
 
-.codeDots span:nth-child(1) { background: #ffe066; }
-.codeDots span:nth-child(2) { background: #ffcc00; }
-.codeDots span:nth-child(3) { background: #cca300; }
+.codeDots span:nth-child(1) { background: #ff5f56; }
+.codeDots span:nth-child(2) { background: #ffbd2e; }
+.codeDots span:nth-child(3) { background: #27c93f; }
 
 .code {
   margin: 0;
